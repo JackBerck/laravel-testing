@@ -1,0 +1,284 @@
+import { Alert, AlertDescription } from '@/components/ui/alert';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import {
+    Card,
+    CardContent,
+    CardDescription,
+    CardHeader,
+    CardTitle,
+} from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
+import {
+    Table,
+    TableBody,
+    TableCell,
+    TableHead,
+    TableHeader,
+    TableRow,
+} from '@/components/ui/table';
+import { Head, Link } from '@inertiajs/react';
+import { AlertCircle, Code, Database, Home } from 'lucide-react';
+import { useState } from 'react';
+
+export default function SqlInjectionLow() {
+    const [userId, setUserId] = useState('');
+    const [results, setResults] = useState(null);
+    const [query, setQuery] = useState('');
+    const [error, setError] = useState('');
+    const [loading, setLoading] = useState(false);
+
+    const handleSubmit = async (e) => {
+        e.preventDefault();
+        setLoading(true);
+        setError('');
+        setResults(null);
+
+        try {
+            const csrfToken =
+                document
+                    .querySelector('meta[name="csrf-token"]')
+                    ?.getAttribute('content') || '';
+            const response = await fetch('/dvwa/sql-injection/low', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': csrfToken,
+                },
+                body: JSON.stringify({ user_id: userId }),
+            });
+
+            const data = await response.json();
+
+            if (data.success) {
+                setResults(data.data);
+                setQuery(data.query);
+            } else {
+                setError(data.error);
+            }
+        } catch {
+            setError('Terjadi kesalahan saat mengirim request');
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    return (
+        <>
+            <Head title="SQL Injection - Low" />
+
+            <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 p-6">
+                <div className="mx-auto max-w-5xl space-y-6">
+                    {/* Header */}
+                    <div className="flex items-center justify-between">
+                        <div>
+                            <h1 className="text-3xl font-bold text-gray-900">
+                                SQL Injection
+                            </h1>
+                            <p className="mt-1 text-gray-600">
+                                Practice Module - DVWA Clone
+                            </p>
+                        </div>
+                        <div className="flex gap-2">
+                            <Badge variant="destructive" className="text-sm">
+                                Level: Low
+                            </Badge>
+                            <Link href="/">
+                                <Button variant="outline" size="sm">
+                                    <Home className="mr-2 h-4 w-4" />
+                                    Home
+                                </Button>
+                            </Link>
+                        </div>
+                    </div>
+
+                    {/* Navigation */}
+                    <Card>
+                        <CardHeader>
+                            <CardTitle className="text-sm">
+                                Difficulty Levels
+                            </CardTitle>
+                        </CardHeader>
+                        <CardContent>
+                            <div className="flex gap-2">
+                                <Badge variant="destructive">
+                                    Low (Current)
+                                </Badge>
+                                <Link href="/dvwa/sql-injection/medium">
+                                    <Badge
+                                        variant="outline"
+                                        className="cursor-pointer hover:bg-orange-100"
+                                    >
+                                        Medium
+                                    </Badge>
+                                </Link>
+                                <Link href="/dvwa/sql-injection/high">
+                                    <Badge
+                                        variant="outline"
+                                        className="cursor-pointer hover:bg-green-100"
+                                    >
+                                        High
+                                    </Badge>
+                                </Link>
+                            </div>
+                        </CardContent>
+                    </Card>
+
+                    {/* Info Card */}
+                    <Alert>
+                        <AlertCircle className="h-4 w-4" />
+                        <AlertDescription>
+                            <strong>Tujuan:</strong> Eksploitasi SQL injection
+                            untuk mengambil informasi dari database.
+                            <br />
+                            <strong>Hint:</strong> Coba masukkan:{' '}
+                            <code className="rounded bg-gray-200 px-2 py-1">
+                                1' OR '1'='1
+                            </code>{' '}
+                            atau{' '}
+                            <code className="rounded bg-gray-200 px-2 py-1">
+                                1' UNION SELECT 1,username,first_name,last_name
+                                FROM dvwa_users--
+                            </code>
+                        </AlertDescription>
+                    </Alert>
+
+                    {/* Main Form */}
+                    <Card>
+                        <CardHeader>
+                            <CardTitle className="flex items-center gap-2">
+                                <Database className="h-5 w-5" />
+                                User ID Lookup
+                            </CardTitle>
+                            <CardDescription>
+                                Masukkan User ID untuk mencari informasi
+                                pengguna
+                            </CardDescription>
+                        </CardHeader>
+                        <CardContent>
+                            <form onSubmit={handleSubmit} className="space-y-4">
+                                <div className="flex gap-3">
+                                    <Input
+                                        type="text"
+                                        placeholder="Masukkan User ID (contoh: 1)"
+                                        value={userId}
+                                        onChange={(e) =>
+                                            setUserId(e.target.value)
+                                        }
+                                        className="flex-1"
+                                    />
+                                    <Button type="submit" disabled={loading}>
+                                        {loading ? 'Loading...' : 'Submit'}
+                                    </Button>
+                                </div>
+                            </form>
+                        </CardContent>
+                    </Card>
+
+                    {/* Query Display */}
+                    {query && (
+                        <Card>
+                            <CardHeader>
+                                <CardTitle className="flex items-center gap-2 text-sm">
+                                    <Code className="h-4 w-4" />
+                                    Query yang Dijalankan
+                                </CardTitle>
+                            </CardHeader>
+                            <CardContent>
+                                <pre className="overflow-x-auto rounded-lg bg-gray-900 p-4 text-green-400">
+                                    {query}
+                                </pre>
+                            </CardContent>
+                        </Card>
+                    )}
+
+                    {/* Results Table */}
+                    {results && results.length > 0 && (
+                        <Card>
+                            <CardHeader>
+                                <CardTitle>
+                                    Hasil Pencarian ({results.length} record)
+                                </CardTitle>
+                            </CardHeader>
+                            <CardContent>
+                                <Table>
+                                    <TableHeader>
+                                        <TableRow>
+                                            <TableHead>ID</TableHead>
+                                            <TableHead>Username</TableHead>
+                                            <TableHead>First Name</TableHead>
+                                            <TableHead>Last Name</TableHead>
+                                        </TableRow>
+                                    </TableHeader>
+                                    <TableBody>
+                                        {results.map((user, index) => (
+                                            <TableRow key={index}>
+                                                <TableCell>{user.id}</TableCell>
+                                                <TableCell>
+                                                    {user.username}
+                                                </TableCell>
+                                                <TableCell>
+                                                    {user.first_name}
+                                                </TableCell>
+                                                <TableCell>
+                                                    {user.last_name}
+                                                </TableCell>
+                                            </TableRow>
+                                        ))}
+                                    </TableBody>
+                                </Table>
+                            </CardContent>
+                        </Card>
+                    )}
+
+                    {/* Error Display */}
+                    {error && (
+                        <Alert variant="destructive">
+                            <AlertCircle className="h-4 w-4" />
+                            <AlertDescription>{error}</AlertDescription>
+                        </Alert>
+                    )}
+
+                    {/* Learning Section */}
+                    <Card className="border-blue-200 bg-blue-50">
+                        <CardHeader>
+                            <CardTitle className="text-blue-900">
+                                📚 Penjelasan Vulnerability
+                            </CardTitle>
+                        </CardHeader>
+                        <CardContent className="space-y-2 text-blue-800">
+                            <p>
+                                <strong>Level Low:</strong> Query SQL langsung
+                                menggunakan input user tanpa validasi atau
+                                sanitasi apapun.
+                            </p>
+                            <p>
+                                <strong>Contoh Exploit:</strong>
+                            </p>
+                            <ul className="ml-4 list-inside list-disc space-y-1">
+                                <li>
+                                    <code>1' OR '1'='1</code> - Menampilkan
+                                    semua data
+                                </li>
+                                <li>
+                                    <code>
+                                        1' UNION SELECT
+                                        1,username,first_name,last_name FROM
+                                        dvwa_users--
+                                    </code>{' '}
+                                    - UNION attack
+                                </li>
+                                <li>
+                                    <code>
+                                        1' AND 1=0 UNION SELECT 1,2,3,4--{' '}
+                                    </code>{' '}
+                                    - Test kolom
+                                </li>
+                            </ul>
+                        </CardContent>
+                    </Card>
+                </div>
+            </div>
+        </>
+    );
+}
