@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\VulnerabilityController;
+use Illuminate\Foundation\Http\Middleware\VerifyCsrfToken;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 use Laravel\Fortify\Features;
@@ -47,6 +48,16 @@ Route::prefix('dvwa')->group(function () {
 
     Route::get('/file-upload/high', [VulnerabilityController::class, 'fileUploadHighView']);
     Route::post('/file-upload/high', [VulnerabilityController::class, 'fileUploadHigh']);
+
+    // CSRF - Low tidak menggunakan middleware CSRF
+    Route::get('/csrf/low', [VulnerabilityController::class, 'csrfLowView']);
+    Route::post('/csrf/low', [VulnerabilityController::class, 'csrfLow'])->withoutMiddleware([VerifyCsrfToken::class]);
+
+    Route::get('/csrf/medium', [VulnerabilityController::class, 'csrfMediumView']);
+    Route::post('/csrf/medium', [VulnerabilityController::class, 'csrfMedium'])->withoutMiddleware([VerifyCsrfToken::class]);
+
+    Route::get('/csrf/high', [VulnerabilityController::class, 'csrfHighView']);
+    Route::post('/csrf/high', [VulnerabilityController::class, 'csrfHigh']); // Menggunakan CSRF protection
 });
 
 require __DIR__ . '/settings.php';
