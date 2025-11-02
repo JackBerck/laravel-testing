@@ -68,13 +68,13 @@ Route::get('/message', [MessageController::class, 'index']);
 Route::get('/health', [MessageController::class, 'health']);
 
 // Auth routes
-Route::post('/register', [AuthController::class, 'register']);
-Route::post('/login', [AuthController::class, 'login']);
+Route::post('/load/register', [AuthController::class, 'load.register']);
+Route::post('/load/login', [AuthController::class, 'load.login']);
 
 // Protected routes
 Route::middleware('auth:sanctum')->group(function () {
-    Route::post('/logout', [AuthController::class, 'logout']);
-    Route::get('/me', [AuthController::class, 'me']);
+    Route::post('/load/logout', [AuthController::class, 'load.logout']);
+    Route::get('/load/me', [AuthController::class, 'load.me']);
 
     // Mahasiswa CRUD
     Route::apiResource('mahasiswa', MahasiswaController::class);
