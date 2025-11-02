@@ -37,6 +37,16 @@ Route::prefix('dvwa')->group(function () {
 
     Route::get('/xss/high', [VulnerabilityController::class, 'xssHighView']);
     Route::post('/xss/high', [VulnerabilityController::class, 'xssHigh']);
+
+    // File Upload
+    Route::get('/file-upload/low', [VulnerabilityController::class, 'fileUploadLowView']);
+    Route::post('/file-upload/low', [VulnerabilityController::class, 'fileUploadLow']);
+
+    Route::get('/file-upload/medium', [VulnerabilityController::class, 'fileUploadMediumView']);
+    Route::post('/file-upload/medium', [VulnerabilityController::class, 'fileUploadMedium']);
+
+    Route::get('/file-upload/high', [VulnerabilityController::class, 'fileUploadHighView']);
+    Route::post('/file-upload/high', [VulnerabilityController::class, 'fileUploadHigh']);
 });
 
 require __DIR__ . '/settings.php';
