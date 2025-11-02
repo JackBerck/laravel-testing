@@ -1,5 +1,8 @@
 <?php
 
+use App\Http\Controllers\Api\AuthController;
+use App\Http\Controllers\Api\MahasiswaController;
+use App\Http\Controllers\Api\MessageController;
 use App\Http\Controllers\VulnerabilityController;
 use Illuminate\Foundation\Http\Middleware\VerifyCsrfToken;
 use Illuminate\Support\Facades\Route;
@@ -58,6 +61,31 @@ Route::prefix('dvwa')->group(function () {
 
     Route::get('/csrf/high', [VulnerabilityController::class, 'csrfHighView']);
     Route::post('/csrf/high', [VulnerabilityController::class, 'csrfHigh']); // Menggunakan CSRF protection
+});
+
+// Public routes
+Route::get('/message', [MessageController::class, 'index']);
+Route::get('/health', [MessageController::class, 'health']);
+
+// Auth routes
+Route::post('/register', [AuthController::class, 'register']);
+Route::post('/login', [AuthController::class, 'login']);
+
+// Protected routes
+Route::middleware('auth:sanctum')->group(function () {
+    Route::post('/logout', [AuthController::class, 'logout']);
+    Route::get('/me', [AuthController::class, 'me']);
+
+    // Mahasiswa CRUD
+    Route::apiResource('mahasiswa', MahasiswaController::class);
+});
+
+// Fallback route
+Route::fallback(function () {
+    return response()->json([
+        'success' => false,
+        'message' => 'Route not found',
+    ], 404);
 });
 
 require __DIR__ . '/settings.php';
