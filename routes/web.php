@@ -75,10 +75,10 @@ Route::post('/load/login', [AuthController::class, 'load.login']);
 Route::middleware('auth:sanctum')->group(function () {
     Route::post('/load/logout', [AuthController::class, 'load.logout']);
     Route::get('/load/me', [AuthController::class, 'load.me']);
-
-    // Mahasiswa CRUD
-    Route::apiResource('mahasiswa', MahasiswaController::class);
 });
+
+// Mahasiswa CRUD
+Route::apiResource('mahasiswa', MahasiswaController::class);
 
 // Fallback route
 Route::fallback(function () {
